@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive, noimageindex">
+<meta name="color-scheme" content="dark">
+<title>DNBNL Block Party</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07070b;--ink:#f3efe6;--dim:#9a97a6;--gold:#ffd54a;--cyan:#4ad7ff;--red:#ff4a6a;--vio:#b46bff;--grn:#5cff8a;--card:#111118;--line:#25252f}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;line-height:1.45;overflow-x:hidden}
+h1,h2,h3,.big{font-family:Anton,Impact,sans-serif;font-weight:400;letter-spacing:.01em;text-transform:uppercase}
+a{color:var(--cyan)}
+#stage{position:fixed;inset:0;z-index:0}
+#world{width:100%;height:100%;display:block}
+#labels{position:absolute;inset:0;pointer-events:none}
+.lab{position:absolute;transform:translate(-50%,-100%);pointer-events:auto;background:rgba(7,7,11,.72);border:1px solid var(--line);padding:.25rem .55rem;border-radius:999px;font-size:.78rem;white-space:nowrap;cursor:pointer;backdrop-filter:blur(4px)}
+.lab b{color:var(--gold)}
+.lab.on{border-color:var(--gold);color:var(--gold)}
+#hud{position:fixed;left:0;right:0;bottom:0;z-index:2;display:flex;gap:.6rem;align-items:center;padding:.6rem .8rem calc(.6rem + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(7,7,11,.9) 40%)}
+#clock{font-family:Anton;font-size:1.6rem;min-width:5.5ch;color:var(--gold)}
+#time{flex:1;accent-color:var(--gold)}
+#hint{font-size:.72rem;color:var(--dim)}
+main{position:relative;z-index:1}
+.spacer{height:88vh}
+section{max-width:980px;margin:0 auto;padding:2rem 1rem}
+.panel{background:rgba(17,17,24,.86);border:1px solid var(--line);border-radius:18px;padding:1.4rem;backdrop-filter:blur(8px)}
+.hero{min-height:88vh;display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:4rem}
+.hero>div{background:linear-gradient(transparent,rgba(7,7,11,.82) 30%);padding:3rem 1rem 1rem;margin:0 -1rem;border-radius:18px}
+.hero .kick{color:#d9d6e0}
+.hero h1{font-size:clamp(3rem,11vw,8.5rem);line-height:.9;margin:0}
+.hero h1 span{display:block;color:var(--gold)}
+.kick{color:var(--dim);font-size:1rem;margin:.6rem 0 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.9rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:1rem}
+.card h3{margin:.1rem 0 .3rem;font-size:1.5rem}
+.tag{display:inline-block;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;padding:.15rem .5rem;border-radius:999px;border:1px solid currentColor;margin-bottom:.4rem}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.6rem}
+.fact{border-left:3px solid var(--gold);padding:.3rem .8rem}
+.fact b{display:block;font-family:Anton;font-size:1.2rem}
+.fact small{color:var(--dim)}
+.bill{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.6rem}
+.act{display:flex;gap:.7rem;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:.7rem;cursor:pointer}
+.act .dot{width:12px;height:12px;border-radius:50%;margin-top:.35rem;flex:none;box-shadow:0 0 12px currentColor}
+.act h4{margin:0;font-family:Anton;font-size:1.25rem;font-weight:400;letter-spacing:.02em}
+.act p{margin:.2rem 0 0;font-size:.86rem;color:var(--dim)}
+.act.on{border-color:var(--gold)}
+#order{min-height:3rem;border:1px dashed var(--line);border-radius:12px;padding:.6rem;display:flex;flex-wrap:wrap;gap:.4rem}
+#order span{background:#1a1a24;border:1px solid var(--line);border-radius:999px;padding:.25rem .6rem;font-size:.85rem}
+.btn{background:var(--gold);color:#111;border:0;border-radius:999px;padding:.55rem 1rem;font-weight:700;cursor:pointer;font-family:inherit}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+details{margin-top:1rem}summary{cursor:pointer;color:var(--dim)}
+.sun{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem;margin-top:.8rem}
+.sun div{padding:.5rem;border-radius:10px;text-align:center;font-size:.8rem;border:1px solid var(--line)}
+.heroimg{width:100%;border-radius:18px;border:1px solid var(--line);box-shadow:0 0 60px rgba(255,213,74,.18);display:block}
+footer{color:var(--dim);font-size:.8rem;text-align:center;padding:2rem 1rem 6rem}
+@media (max-width:600px){.hero{padding-bottom:5rem}.sun{grid-template-columns:repeat(2,1fr)}}
+.nojs #stage{display:none}
+</style>
+</head>
+<body class="nojs">
+<div id="stage"><canvas id="world"></canvas><div id="labels"></div></div>
+<div id="hud"><div id="clock">4:00</div><input id="time" type="range" min="0" max="450" value="0" step="5" aria-label="Time of day"><div id="hint">drag the day into the night</div></div>
+
+<main>
+<section class="hero">
+  <div>
+    <p class="kick">Brownies &amp; Lemonade · five years of DNBNL · Saturday, September 12, 2026 · The Compound, Commerce</p>
+    <h1>Shut down<span>a block.</span></h1>
+    <p class="kick">For Gordon, David and Trent. Three VIP+ wristbands, two stages, one sunset. Scroll: the lot goes from four in the afternoon to half past eleven.</p>
+  </div>
+</section>
+
+<section><img class="heroimg" src="assets/hero.jpg" alt="Golden hour on a closed street in Commerce, two light-box stages, a crowd" onerror="this.style.display='none'"></section>
+<section><div class="panel">
+  <h2>The day, as far as anyone has said it</h2>
+  <div class="facts"><div class="fact"><small>Doors</small><b>4:00pm</b><small>DICE, Aug 21</small></div><div class="fact"><small>Ends</small><b>11:30pm</b><small>Gordon&#x27;s calendar, day to night</small></div><div class="fact"><small>Sunset</small><b>about 7:05pm</b><small>Los Angeles, Sept 12</small></div><div class="fact"><small>Venue</small><b>The Compound, 2909 Supply Ave, Commerce 90040</b><small>moved from Mateo Warehouse on Aug 21</small></div><div class="fact"><small>Tickets</small><b>VIP+ stage access, three</b><small>DICE order, June 22</small></div><div class="fact"><small>Stages</small><b>Two, indoor and outdoor</b><small>B&amp;L announcement, June 18</small></div><div class="fact"><small>Sunday</small><b>Gordon at BlizzCon, Anaheim</b><small>Tixr pass, Sunday only</small></div></div>
+  <p class="kick">Set times and the stage split have not been published as of September 4. When they drop, the beams above sort themselves. Until then the bill is alphabetical by who you should not miss.</p>
+  <div class="sun"><div>4pm doors<br><small>heat, water, sunscreen</small></div><div>7:05pm sunset<br><small>the turn</small></div><div>after dark<br><small>the heavy hours</small></div><div>11:30pm<br><small>Sunday is Anaheim</small></div></div>
+</div></section>
+
+<section><div class="panel">
+  <h2>The crew</h2>
+  <div class="grid"><div class="card"><span class="tag">The one who brings people in.</span><h3>Gordon</h3><p>Bought three VIP+ at the 9am on-sale, June 22. Sub Focus at the Shrine last October, with David staying at the house. HARD Summer 2022, Sub Focus and Dimension on the Saturday. Countdown 2025, Sub Focus again.</p></div><div class="card"><span class="tag">Ride or die.</span><h3>David</h3><p>First rave: Escape, October 26, 2018, a gift from Gordon. Moved to San Francisco with Trent in 2022, and Gordon worked the guest list so their first show as San Franciscans was Knock2. Twelve nights and six cities with Gordon since 2018. Sub Focus last October. Hosts Gordon for Portola in thirteen days.</p></div><div class="card"><span class="tag">The newest rail.</span><h3>Trent</h3><p>First EDC with this crew, May 2026, Cosmic Meadow, seven on the rail. Lives in San Francisco with David. As far as the record shows, his first drum and bass rail with these two.</p></div></div>
+</div></section>
+
+<section><div class="panel">
+  <h2>The bill · thirteen</h2>
+  <p class="kick">Tap an act to light its beam in the lot and add it to your running order. Colour is the lane: gold headliner, cyan liquid, red heavy, violet dancefloor, green jump-up. Notes are Darby's shorthand, argue at the rail.</p>
+  <div class="bill" id="bill"><div class="act" data-n="Pendulum" style="color:#ffd54a"><span class="dot" style="background:#ffd54a"></span><div><h4 style="color:var(--ink)">Pendulum</h4><p>Perth to London. The band that put drum and bass in arenas. Expect a DJ set built on the anthems.</p></div></div><div class="act" data-n="Danny Byrd" style="color:#4ad7ff"><span class="dot" style="background:#4ad7ff"></span><div><h4 style="color:var(--ink)">Danny Byrd</h4><p>Hospital Records veteran from Bath. Big vocal drum and bass, sunset music.</p></div></div><div class="act" data-n="S.P.Y" style="color:#4ad7ff"><span class="dot" style="background:#4ad7ff"></span><div><h4 style="color:var(--ink)">S.P.Y</h4><p>Brazilian-born, London-based, Hospital Records. Deep, musical, relentless.</p></div></div><div class="act" data-n="Fred V" style="color:#4ad7ff"><span class="dot" style="background:#4ad7ff"></span><div><h4 style="color:var(--ink)">Fred V</h4><p>One half of Fred V and Grafix, solo since 2019. Melodic, huge chords.</p></div></div><div class="act" data-n="Dirtyphonics" style="color:#ff4a6a"><span class="dot" style="background:#ff4a6a"></span><div><h4 style="color:var(--ink)">Dirtyphonics</h4><p>Paris. Heavy, distorted, the crossover with bass music.</p></div></div><div class="act" data-n="K Motionz" style="color:#b46bff"><span class="dot" style="background:#b46bff"></span><div><h4 style="color:var(--ink)">K Motionz</h4><p>UK dancefloor. The crowd-mover of the last three years.</p></div></div><div class="act" data-n="Mozey" style="color:#5cff8a"><span class="dot" style="background:#5cff8a"></span><div><h4 style="color:var(--ink)">Mozey</h4><p>UK jump-up. Bounce.</p></div></div><div class="act" data-n="Skanka" style="color:#5cff8a"><span class="dot" style="background:#5cff8a"></span><div><h4 style="color:var(--ink)">Skanka</h4><p>UK jump-up. Bounce, louder.</p></div></div><div class="act" data-n="Andromedik" style="color:#4ad7ff"><span class="dot" style="background:#4ad7ff"></span><div><h4 style="color:var(--ink)">Andromedik</h4><p>Belgium, Liquicity family. Bright, festival-sized liquid.</p></div></div><div class="act" data-n="T &amp; Sugah" style="color:#4ad7ff"><span class="dot" style="background:#4ad7ff"></span><div><h4 style="color:var(--ink)">T &amp; Sugah</h4><p>Netherlands duo. Liquid with teeth.</p></div></div><div class="act" data-n="Manila Killa" style="color:#b46bff"><span class="dot" style="background:#b46bff"></span><div><h4 style="color:var(--ink)">Manila Killa</h4><p>Filipino-American, came up in future bass, now on the drum and bass side.</p></div></div><div class="act" data-n="Natty Lou" style="color:#5cff8a"><span class="dot" style="background:#5cff8a"></span><div><h4 style="color:var(--ink)">Natty Lou</h4><p>Bristol. Jump-up and dancefloor, fast hands.</p></div></div><div class="act" data-n="Blossom" style="color:#b46bff"><span class="dot" style="background:#b46bff"></span><div><h4 style="color:var(--ink)">Blossom</h4><p>UK, rising. Dancefloor drum and bass.</p></div></div></div>
+  <h3 style="margin-top:1.2rem">Your running order</h3>
+  <div id="order"><span style="color:var(--dim);border:0;background:none">nothing yet</span></div>
+  <p><button class="btn" id="share">Copy my order</button> <button class="btn ghost" id="clear">Clear</button> <span id="copied" class="kick"></span></p>
+</div></section>
+
+<section><div class="panel">
+  <h2>The moves</h2>
+  <ul>
+    <li><b>Venue changed on August 21.</b> Not Mateo Warehouse. The Compound, 2909 Supply Avenue, Commerce, off the 5 and the 710. Put that in the rideshare, not "DNBNL".</li>
+    <li><b>Three VIP+ wristbands on Gordon's DICE.</b> One phone holds all three at the door, so nobody goes in first. Stage access means the rail is not the only place to stand.</li>
+    <li><b>It starts in daylight.</b> September in Commerce is hot at four. Water before the first drop, shade between sets, the outdoor stage has the sun on it until seven.</li>
+    <li><b>Sunday is not a rest day.</b> Gordon has a BlizzCon pass for Sunday in Anaheim, thirty minutes south. Last set, home, sleep, murlocs.</li>
+    <li><b>Thirteen days later: Portola.</b> David hosts in San Francisco, September 25 to 27. This is the warm-up.</li>
+  </ul>
+</div></section>
+
+<section><div class="panel">
+  <h2>Why this one</h2>
+  <p>DNBNL started as Brownies &amp; Lemonade's drum and bass night in 2021 and this is the first time they have tried to shut down a block for it. Gordon's own record with this music runs through Sub Focus three times in a year, Dimension at HARD Summer, and Countdown on the last night of 2025. David's first rave was a gift from Gordon in 2018, and he was in the house for Sub Focus last October. Trent's first EDC was this May with this crew. The three of you at one drum and bass stage is new. That is the whole point of Saturday.</p>
+</div></section>
+
+<details><summary>Sources and what is not verified</summary>
+<section><div class="panel">
+<ul>
+<li>Lineup, doors, ticket type and quantity: DICE order and update emails, June 22, August 5, August 21, 2026.</li>
+<li>Venue change to The Compound: DICE update, August 21, 2026.</li>
+<li>"Two stages, day to night, shut down a block," five years of DNBNL: Brownies &amp; Lemonade announcement, June 18, 2026, and Gordon's own calendar entry.</li>
+<li>Crew history: Gordon's message record, the live-music ledger of August 2026.</li>
+<li>Sunset is an estimate for Los Angeles on September 12. Set times, stage assignments, re-entry and bag policy are not published anywhere I could read; the DICE page returns 403 to a script and Instagram is not readable here. Check the B&amp;L Instagram the morning of.</li>
+<li>Artist notes are Darby's shorthand from general knowledge, not from the promoter.</li>
+</ul>
+</div></section>
+</details>
+<footer>Built by Darby for Gordon, David and Trent · September 4, 2026 · not indexed</footer>
+</main>
+
+<script>
+document.body.classList.remove('nojs');
+const ARTISTS = [{"n": "Pendulum", "b": "Perth to London. The band that put drum and bass in arenas. Expect a DJ set built on the anthems.", "l": "headliner", "c": "#ffd54a"}, {"n": "Danny Byrd", "b": "Hospital Records veteran from Bath. Big vocal drum and bass, sunset music.", "l": "liquid", "c": "#4ad7ff"}, {"n": "S.P.Y", "b": "Brazilian-born, London-based, Hospital Records. Deep, musical, relentless.", "l": "liquid", "c": "#4ad7ff"}, {"n": "Fred V", "b": "One half of Fred V and Grafix, solo since 2019. Melodic, huge chords.", "l": "liquid", "c": "#4ad7ff"}, {"n": "Dirtyphonics", "b": "Paris. Heavy, distorted, the crossover with bass music.", "l": "heavy", "c": "#ff4a6a"}, {"n": "K Motionz", "b": "UK dancefloor. The crowd-mover of the last three years.", "l": "dancefloor", "c": "#b46bff"}, {"n": "Mozey", "b": "UK jump-up. Bounce.", "l": "jump-up", "c": "#5cff8a"}, {"n": "Skanka", "b": "UK jump-up. Bounce, louder.", "l": "jump-up", "c": "#5cff8a"}, {"n": "Andromedik", "b": "Belgium, Liquicity family. Bright, festival-sized liquid.", "l": "liquid", "c": "#4ad7ff"}, {"n": "T & Sugah", "b": "Netherlands duo. Liquid with teeth.", "l": "liquid", "c": "#4ad7ff"}, {"n": "Manila Killa", "b": "Filipino-American, came up in future bass, now on the drum and bass side.", "l": "dancefloor", "c": "#b46bff"}, {"n": "Natty Lou", "b": "Bristol. Jump-up and dancefloor, fast hands.", "l": "jump-up", "c": "#5cff8a"}, {"n": "Blossom", "b": "UK, rising. Dancefloor drum and bass.", "l": "dancefloor", "c": "#b46bff"}];
+/* ---------- state ---------- */
+let order = []; try{ order = JSON.parse(localStorage.getItem('dnbnl.order')||'[]'); }catch(e){}
+const lit = new Set(order);
+function renderOrder(){
+  const el=document.getElementById('order'); el.innerHTML='';
+  if(!order.length){ el.innerHTML='<span style="color:var(--dim);border:0;background:none">nothing yet</span>'; return; }
+  order.forEach((n,i)=>{ const s=document.createElement('span'); s.textContent=(i+1)+'. '+n; el.appendChild(s); });
+  try{ localStorage.setItem('dnbnl.order', JSON.stringify(order)); }catch(e){}
+}
+function toggle(n){
+  if(lit.has(n)){ lit.delete(n); order=order.filter(x=>x!==n); } else { lit.add(n); order.push(n); }
+  document.querySelectorAll('.act').forEach(a=>a.classList.toggle('on', lit.has(a.dataset.n)));
+  document.querySelectorAll('.lab').forEach(a=>a.classList.toggle('on', lit.has(a.dataset.n)));
+  renderOrder();
+}
+document.querySelectorAll('.act').forEach(a=>{ a.addEventListener('click',()=>toggle(a.dataset.n)); a.classList.toggle('on',lit.has(a.dataset.n)); });
+renderOrder();
+document.getElementById('clear').onclick=()=>{ order=[]; lit.clear(); document.querySelectorAll('.act,.lab').forEach(a=>a.classList.remove('on')); renderOrder(); };
+document.getElementById('share').onclick=async()=>{ const t='DNBNL running order: '+order.join(' > '); try{ await navigator.clipboard.writeText(t); document.getElementById('copied').textContent='copied'; }catch(e){ document.getElementById('copied').textContent=t; } };
+
+/* ---------- the lot: hand-rolled WebGL, no library ---------- */
+const C=document.getElementById('world'), gl=C.getContext('webgl',{antialias:true,alpha:false});
+if(gl){
+const VS=`attribute vec3 p;attribute vec3 c;uniform mat4 mvp;varying vec3 vc;varying float vy;void main(){gl_Position=mvp*vec4(p,1.);vc=c;vy=p.y;}`;
+const FS=`precision mediump float;varying vec3 vc;varying float vy;uniform vec3 fog;uniform float night;void main(){vec3 col=vc;gl_FragColor=vec4(mix(col,fog,clamp(0.15+0.35*night,0.,.6)*0.0)+col*0.0+col,1.);}`;
+function sh(t,s){const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);return o;}
+const prog=gl.createProgram();gl.attachShader(prog,sh(gl.VERTEX_SHADER,VS));gl.attachShader(prog,sh(gl.FRAGMENT_SHADER,FS));gl.linkProgram(prog);gl.useProgram(prog);
+const aP=gl.getAttribLocation(prog,'p'),aC=gl.getAttribLocation(prog,'c'),uM=gl.getUniformLocation(prog,'mvp'),uF=gl.getUniformLocation(prog,'fog'),uN=gl.getUniformLocation(prog,'night');
+/* matrices */
+const mul=(a,b)=>{const o=new Float32Array(16);for(let i=0;i<4;i++)for(let j=0;j<4;j++){let s=0;for(let k=0;k<4;k++)s+=a[k*4+j]*b[i*4+k];o[i*4+j]=s;}return o;};
+const persp=(f,a,n,fa)=>{const t=1/Math.tan(f/2),o=new Float32Array(16);o[0]=t/a;o[5]=t;o[10]=(fa+n)/(n-fa);o[11]=-1;o[14]=2*fa*n/(n-fa);return o;};
+const nrm=v=>{const l=Math.hypot(v[0],v[1],v[2])||1;return[v[0]/l,v[1]/l,v[2]/l];};
+const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+const dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const look=(e,c,u)=>{const z=nrm([e[0]-c[0],e[1]-c[1],e[2]-c[2]]),x=nrm(cross(u,z)),y=cross(z,x);return new Float32Array([x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,-dot(x,e),-dot(y,e),-dot(z,e),1]);};
+/* geometry: boxes with per-face shade (top 1, ns .8, ew .62) */
+const V=[],Cc=[];
+function box(x,y,z,w,h,d,col,glow){
+  const f=(a,b,c,dd,s)=>{[a,b,c,a,c,dd].forEach(p=>{V.push(...p);Cc.push(col[0]*s,col[1]*s,col[2]*s);});};
+  const x2=x+w,y2=y+h,z2=z+d, g=glow||1;
+  f([x,y2,z],[x2,y2,z],[x2,y2,z2],[x,y2,z2],1*g);
+  f([x,y,z2],[x2,y,z2],[x2,y2,z2],[x,y2,z2],.8*g);
+  f([x2,y,z],[x,y,z],[x,y2,z],[x2,y2,z],.8*g);
+  f([x2,y,z2],[x2,y,z],[x2,y2,z],[x2,y2,z2],.62*g);
+  f([x,y,z],[x,y,z2],[x,y2,z2],[x,y2,z],.62*g);
+}
+/* the block: a lot 60 x 40, warehouses around it, two stages */
+const asphalt=[.09,.09,.11];
+box(-40,-.5,-30,80,.5,60,asphalt);
+/* perimeter warehouses, Commerce style: long, low, corrugated */
+const wh=[.16,.15,.18];
+box(-40,0,-30,80,7,6,wh); box(-40,0,24,80,6,6,wh); box(-40,0,-24,6,8,48,wh); box(34,0,-24,6,5,48,wh);
+/* a few rooftop units and a water tower */
+box(-10,7,-28,4,2,3,[.2,.2,.22]); box(12,7,-27,3,2,2,[.2,.2,.22]); box(30,6,26,3,3,3,[.22,.2,.2]);
+box(-36,8,-8,3,6,3,[.25,.22,.2]); box(-37,14,-9,5,3,5,[.3,.26,.24]);
+/* STAGE A, outdoor, west end: a light box */
+const STAGES=[{n:'Outdoor stage',x:-30,z:0,col:[1,.83,.29]},{n:'Indoor stage',x:26,z:6,col:[.29,.84,1]}];
+box(-34,0,-9,8,9,18,[.12,.12,.15]); box(-34.2,9,-9.2,8.4,.6,18.4,[1,.83,.29],1);
+box(18,0,-3,14,8,18,[.12,.13,.16]); box(17.8,8,-3.2,14.4,.6,18.4,[.29,.84,1],1);
+/* the crowd: dots of people, derived count is theatre, not a claim */
+for(let i=0;i<260;i++){const px=-26+Math.random()*44,pz=-22+Math.random()*44;const t=[.85,.8,.75][i%3];box(px,0,pz,.6,1.6+Math.random()*.4,.6,[t*.35,t*.32,t*.4]);}
+/* beams: one per act, ringed around the lot; positions are placeholders until the stage split is public */
+const BEAMS=ARTISTS.map((a,i)=>{const ang=(i/ARTISTS.length)*Math.PI*2;const r=22;const x=Math.cos(ang)*r, z=Math.sin(ang)*r*.7;const c=hex(a.c);box(x-.35,0,z-.35,.7,26,.7,c,1);return {a,x,z,c};});
+function hex(h){return[parseInt(h.slice(1,3),16)/255,parseInt(h.slice(3,5),16)/255,parseInt(h.slice(5,7),16)/255];}
+const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(V),gl.STATIC_DRAW);
+const cb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,cb);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(Cc),gl.STATIC_DRAW);
+gl.enable(gl.DEPTH_TEST);
+/* labels */
+const L=document.getElementById('labels');
+const labs=BEAMS.map(b=>{const d=document.createElement('div');d.className='lab';d.dataset.n=b.a.n;d.innerHTML='<b>'+b.a.n+'</b>';d.onclick=()=>toggle(b.a.n);d.classList.toggle('on',lit.has(b.a.n));L.appendChild(d);return d;});
+const slabs=STAGES.map(s=>{const d=document.createElement('div');d.className='lab';d.style.pointerEvents='none';d.textContent=s.n;L.appendChild(d);return d;});
+/* time of day: 0 = 4:00pm, 450 = 11:30pm; sunset ~7:05pm = 185 */
+const slider=document.getElementById('time'), clock=document.getElementById('clock');
+let T=0, drift=0;
+slider.oninput=()=>{T=+slider.value;};
+function skyFor(t){const sunset=185, dusk=230;const night=Math.min(1,Math.max(0,(t-sunset)/(dusk-sunset)));const day=[.55,.68,.85],gold=[.98,.55,.25],nite=[.02,.02,.05];let c;if(t<sunset-60)c=day;else if(t<sunset){const k=(t-(sunset-60))/60;c=day.map((v,i)=>v+(gold[i]-v)*k);}else{c=gold.map((v,i)=>v+(nite[i]-v)*night);}return{c,night};}
+function fmt(t){const m=16*60+t;const h=Math.floor(m/60),mm=m%60;const h12=h>12?h-12:h;return h12+':'+String(mm).padStart(2,'0');}
+function resize(){const dpr=Math.min(2,devicePixelRatio||1);C.width=C.clientWidth*dpr;C.height=C.clientHeight*dpr;gl.viewport(0,0,C.width,C.height);}
+addEventListener('resize',resize);resize();
+let scrollT=0;addEventListener('scroll',()=>{const h=document.body.scrollHeight-innerHeight;scrollT=Math.min(1,Math.max(0,scrollY/h));},{passive:true});
+function frame(ts){
+  drift+=.0025;
+  const t=Math.max(T, scrollT*450); slider.value=t; clock.textContent=fmt(t);
+  const {c,night}=skyFor(t);
+  gl.clearColor(c[0],c[1],c[2],1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  const asp=C.width/C.height;const fov=asp<1?1.25:0.9;
+  const eye=[Math.sin(drift)*55, 30+ (asp<1?10:0), Math.cos(drift)*55];
+  const M=mul(persp(fov,asp,1,400),look(eye,[0,4,0],[0,1,0]));
+  gl.uniformMatrix4fv(uM,false,M);gl.uniform3fv(uF,c);gl.uniform1f(uN,night);
+  gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(aP);gl.vertexAttribPointer(aP,3,gl.FLOAT,false,0,0);
+  gl.bindBuffer(gl.ARRAY_BUFFER,cb);gl.enableVertexAttribArray(aC);gl.vertexAttribPointer(aC,3,gl.FLOAT,false,0,0);
+  gl.drawArrays(gl.TRIANGLES,0,V.length/3);
+  /* project labels */
+  const W=C.clientWidth,H=C.clientHeight;
+  const proj=(x,y,z)=>{const v=[x,y,z,1];const o=[0,0,0,0];for(let i=0;i<4;i++)o[i]=M[i]*v[0]+M[4+i]*v[1]+M[8+i]*v[2]+M[12+i]*v[3];if(o[3]<=0)return null;return[(o[0]/o[3]*.5+.5)*W,(1-(o[1]/o[3]*.5+.5))*H];};
+  BEAMS.forEach((b,i)=>{const p=proj(b.x,26,b.z);const d=labs[i];if(!p){d.style.display='none';return;}d.style.display='';d.style.left=Math.min(Math.max(p[0],56),W-56)+'px';d.style.top=Math.max(p[1],34)+'px';d.style.opacity=night>.2||lit.has(b.a.n)?1:.55;});
+  STAGES.forEach((s,i)=>{const p=proj(s.x,11,s.z);const d=slabs[i];if(!p){d.style.display='none';return;}d.style.display='';d.style.left=p[0]+'px';d.style.top=p[1]+'px';});
+  requestAnimationFrame(frame);
+}
+document.fonts?document.fonts.ready.then(()=>requestAnimationFrame(frame)):requestAnimationFrame(frame);
+}
+</script>
+</body>
+</html>
